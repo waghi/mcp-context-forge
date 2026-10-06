@@ -8,6 +8,8 @@
 
 ## [Unreleased]
 
+- **A2A plugin header trust** - A2A pre-invoke plugins can supply credentials and custom headers without the agent caller-header allowlist. Plugin output now overrides configured agent authentication, and an empty `Authorization` value suppresses all fallback authorization. The gateway retains inbound caller filtering, sanitizes plugin input, resolves output case-insensitively, and strips `X-Vault-Tokens` before egress.
+
 - **`make testing-up` web UI URL** - The startup summary now shows a `ContextForge Web UI` row whose port comes from the resolved Compose configuration. The printed URL now matches the port Compose publishes when `WEB_UI_PORT` is set only in `.env`. Resolution failure stops the target instead of printing a fallback URL.
 
 - **JWT lifecycle clarification after database reset** - Local JWTs remain cryptographically valid when database storage is lost but the signing key remains unchanged. Database cleanup is not credential rotation. Destructive resets must rotate `JWT_SECRET_KEY` when old-token invalidation is required. Persistent database storage and short-lived local tokens remain recommended for production deployments.

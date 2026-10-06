@@ -59,5 +59,6 @@ This page tracks all significant design decisions made for ContextForge project,
 | 0054  | Remove Granian HTTP Server (supersedes ADR-0025)     | Accepted  | Performance   | 2026-07-22 |
 | 0055  | Scope Tool Lookup Cache Entries (supersedes ADR-0033) | Accepted | Security | 2026-09-24  |
 | 0056  | CSP Hardening — No eval, No Inline Handlers, Nonce-Only Scripts (supersedes ADR-0014 CSP) | Accepted | Security | 2026-10-01  |
+| 0057  | Trust A2A Plugin Header Output | Accepted | Security | 2026-10-06 |
 
 > ✳️ Add new decisions chronologically and link to them from this table.
