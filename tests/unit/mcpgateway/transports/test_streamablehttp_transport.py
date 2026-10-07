@@ -5481,6 +5481,7 @@ async def test_complete_forwards_request_metadata(monkeypatch):
 @pytest.mark.asyncio
 async def test_complete_defaults_non_admin_without_teams_to_public_only_scope(monkeypatch):
     """Completion should use public-only scope when non-admin context has teams=None."""
+    monkeypatch.setattr(tr, "_check_streamable_permission", AsyncMock(return_value=True))
     # Third-Party
     import mcp_types as mcp_types
 
@@ -5553,6 +5554,7 @@ async def test_complete_preserves_admin_bypass_for_null_teams_context(monkeypatc
 @pytest.mark.asyncio
 async def test_complete_preserves_explicit_team_scope(monkeypatch):
     """Completion should preserve explicit token team scope from user context."""
+    monkeypatch.setattr(tr, "_check_streamable_permission", AsyncMock(return_value=True))
     # Third-Party
     import mcp_types as mcp_types
 
@@ -15714,6 +15716,7 @@ async def test_set_logging_level_oauth_enforcement_with_authenticated_context(mo
 @pytest.mark.asyncio
 async def test_complete_oauth_enforcement_with_authenticated_context(monkeypatch):
     """complete calls _check_server_oauth_enforcement in permissive mode."""
+    monkeypatch.setattr(tr, "_check_streamable_permission", AsyncMock(return_value=True))
     # First-Party
     from mcpgateway.transports.streamablehttp_transport import complete
 
@@ -17051,6 +17054,28 @@ async def test_complete_denied_by_token_scope(monkeypatch):
 
     with pytest.raises(PermissionError, match="Access denied"):
         await complete(ref, argument)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("server_id", [None, "server-1"])
+async def test_complete_denied_by_rbac(monkeypatch, server_id):
+    """Reject completion when token scope permits tools.read but RBAC denies it."""
+    user_context = _scoped_user_context(["tools.read"])
+    monkeypatch.setattr(tr, "_get_request_context_or_default", AsyncMock(return_value=(server_id, None, user_context)))
+    permission = AsyncMock(return_value=False)
+    monkeypatch.setattr(tr, "_check_streamable_permission", permission)
+    completion = AsyncMock()
+    monkeypatch.setattr(tr.completion_service, "handle_completion", completion)
+
+    with pytest.raises(PermissionError, match="Access denied"):
+        await tr.complete({"type": "ref/prompt", "name": "test"}, {"name": "arg", "value": "val"})
+
+    permission.assert_awaited_once_with(
+        user_context=user_context,
+        permission="tools.read",
+        check_any_team=tr._check_any_team_for_server_scoped_rbac(user_context, server_id),
+    )
+    completion.assert_not_awaited()
 
 
 @pytest.mark.asyncio
