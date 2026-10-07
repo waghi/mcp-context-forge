@@ -1455,7 +1455,8 @@ These settings mitigate CPU spin loops that can occur when SSE/MCP connections a
 
 MCP `tools/list`, `resources/list`, `prompts/list`, and `resources/templates/list` return bounded pages.
 Send the returned `nextCursor` as `params.cursor` until the response omits `nextCursor`.
-This applies to global and virtual-server catalogs in both Python and Rust.
+Python handles pagination for global and virtual-server catalogs.
+The deprecated Rust edge forwards catalog requests to Python, including continuation cursors.
 REST and Admin pagination settings remain separate.
 
 | Variable | Default | Purpose |
